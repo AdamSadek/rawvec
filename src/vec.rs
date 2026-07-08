@@ -1,4 +1,4 @@
-use std::alloc::{GlobalAlloc, Layout, LayoutError, System, alloc};
+use std::alloc::{Layout, alloc};
 
 #[derive(Debug)]
 pub struct RawVec<T> {
@@ -22,11 +22,8 @@ impl<T> RawVec<T> {
     }
 
     pub fn push(&mut self, item: T) {
-        println!("ptr: {:?}", self.ptr as usize);
-        println!("cap: {:?}", self.capacity);
-
         if self.ptr as usize >= self.capacity as usize {
-            eprintln!("max size reached");
+            panic!("RawVec capacity exceeded")
         } else {
             unsafe {
                 self.ptr.write(item);
@@ -52,5 +49,33 @@ impl<T> RawVec<T> {
 
     pub fn len(&self) {
         println!("{:?}", self.len);
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_push() {
+        const VEC_SIZE: usize = 10;
+        let mut vec: RawVec<u32> = RawVec::new(VEC_SIZE);
+
+        for i in 1..=VEC_SIZE as u32 {
+            vec.push(i);
+        }
+        assert_eq!(vec.len, VEC_SIZE, "expected vector size to be {VEC_SIZE}");
+    }
+
+    #[test]
+    #[should_panic(expected = "RawVec capacity exceeded")]
+    fn test_push_fails_on_out_of_bounds() {
+        const VEC_SIZE: usize = 10;
+        const LARGER_VEC_SIZE: usize = 15;
+        let mut vec: RawVec<u32> = RawVec::new(VEC_SIZE);
+
+        for i in 1..=LARGER_VEC_SIZE as u32 {
+            vec.push(i);
+        }
     }
 }
