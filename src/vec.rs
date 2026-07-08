@@ -38,7 +38,7 @@ impl<T> RawVec<T> {
         T: std::fmt::Debug,
     {
         print!("[");
-        for i in 0..self.len {
+        for i in 0..self.len() {
             if i != 0 {
                 print!(", ");
             }
@@ -47,8 +47,8 @@ impl<T> RawVec<T> {
         println!("]");
     }
 
-    pub fn len(&self) {
-        println!("{:?}", self.len);
+    pub fn len(&self) -> usize {
+        self.len
     }
 }
 
@@ -57,14 +57,31 @@ mod tests {
     use super::*;
 
     #[test]
-    fn test_push() {
+    fn test_push_exact_vec_size() {
         const VEC_SIZE: usize = 10;
         let mut vec: RawVec<u32> = RawVec::new(VEC_SIZE);
 
         for i in 1..=VEC_SIZE as u32 {
             vec.push(i);
         }
-        assert_eq!(vec.len, VEC_SIZE, "expected vector size to be {VEC_SIZE}");
+        assert_eq!(vec.len(), VEC_SIZE, "expected vector size to be {VEC_SIZE}");
+    }
+
+    #[test]
+    fn test_push_one_less_than_size() {
+        const VEC_SIZE: usize = 10;
+        const VEC_SIZE_MINUS_ONE: usize = VEC_SIZE - 1;
+        let mut vec: RawVec<u32> = RawVec::new(VEC_SIZE);
+
+        for i in 1..=VEC_SIZE_MINUS_ONE as u32 {
+            vec.push(i);
+        }
+        assert_eq!(vec.len(), VEC_SIZE_MINUS_ONE);
+        assert!(
+            vec.len() < VEC_SIZE,
+            "expected vector length {:?} to be less than {VEC_SIZE}",
+            vec.len()
+        );
     }
 
     #[test]
@@ -78,4 +95,23 @@ mod tests {
             vec.push(i);
         }
     }
+
+    // revisit
+    //
+    // #[test]
+    // fn test_push_with_large_intgers() {
+    //     const VEC_SIZE: usize = 10;
+    //     let mut vec: RawVec<usize> = RawVec::new(VEC_SIZE);
+
+    //     for i in usize::MAX..=usize::MAX {
+    //         vec.push(i);
+    //     }
+    //     vec.print();
+    //     assert_eq!(
+    //         vec.len(),
+    //         VEC_SIZE,
+    //         "expected vector length {:?}, to be vector total size {VEC_SIZE}",
+    //         vec.len()
+    //     )
+    // }
 }
